@@ -1,0 +1,4 @@
+*.exe
+files/*.pdf
+.env
+data.json
