@@ -2,3 +2,4 @@
 files/*.pdf
 .env
 data.json
+.idea
