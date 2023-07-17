@@ -14,7 +14,7 @@ var state = make(map[int64]string)
 
 func SetState(key int64, value string) {
 	state[key] = value
-	updateCache()
+	UpdateCache()
 }
 
 func GetState(key int64) (string, bool) {
@@ -24,10 +24,10 @@ func GetState(key int64) (string, bool) {
 
 func RemoveFromState(key int64) {
 	delete(state, key)
-	updateCache()
+	UpdateCache()
 }
 
-func updateCache() {
+func UpdateCache() {
 	go func() {
 		data, _ := json.MarshalIndent(state, "", " ")
 		file, err := os.OpenFile(stateFileName, os.O_WRONLY|os.O_TRUNC, 0644)

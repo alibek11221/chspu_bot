@@ -11,6 +11,7 @@ const (
 	Masters   string = "Магистратура"
 	PostGrad  string = "Аспирантура"
 	Secondary string = "Среднее профессиональное образование"
+	EduLevels string = "Выберите уровень образования"
 )
 
 const (

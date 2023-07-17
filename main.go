@@ -7,6 +7,9 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"github.com/joho/godotenv"
 	"github.com/mymmrac/telego"
@@ -30,12 +33,17 @@ func main() {
 		fmt.Println(err)
 		os.Exit(1)
 	}
+	sigs := make(chan os.Signal)
 
-	updates, _ := bot.UpdatesViaLongPolling(nil)
-	bh, _ := th.NewBotHandler(bot, updates)
+	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
 
-	defer bh.Stop()
-	defer bot.StopLongPolling()
+	done := make(chan struct{}, 1)
+
+	updates, _ := bot.UpdatesViaWebhook("/bot"+bot.Token(), telego.WithWebhookSet(&telego.SetWebhookParams{
+		URL: "https://b330-188-0-169-220.ngrok-free.app/bot" + bot.Token(),
+	}))
+
+	bh, _ := th.NewBotHandler(bot, updates, th.WithStopTimeout(time.Second*5))
 
 	state.PopulateFromCache()
 
@@ -45,7 +53,21 @@ func main() {
 
 	bh.HandleCallbackQuery(handleInnit, th.CallbackDataEqual("start"))
 
-	bh.Start()
+	go func() {
+		<-sigs
+		fmt.Println("Stopping")
+		_ = bot.StopWebhook()
+		state.UpdateCache()
+		bh.Stop()
+		done <- struct{}{}
+	}()
+	go bh.Start()
+	fmt.Println("Start handling")
+	go func() {
+		_ = bot.StartWebhook("127.0.0.1:8080")
+	}()
+	<-done
+	fmt.Println("Done")
 }
 func handleMessage(bot *telego.Bot, update telego.Update) {
 	if update.Message.Text == "/start" {

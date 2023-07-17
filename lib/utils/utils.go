@@ -17,7 +17,7 @@ func SendTextMessage(bot *telego.Bot, update telego.Update, text string, menu te
 			WithProtectContent(),
 	)
 	switch msg.Text {
-	case domain.Bachelor, domain.Masters, domain.PostGrad, domain.Secondary:
+	case domain.Bachelor, domain.Masters, domain.PostGrad, domain.Secondary, domain.EduLevels:
 		state.SetState(update.Message.Chat.ID, msg.Text)
 	}
 
