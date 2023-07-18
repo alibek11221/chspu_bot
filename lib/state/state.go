@@ -50,21 +50,23 @@ func UpdateCache() {
 }
 
 func PopulateFromCache() {
-	file, err := os.OpenFile(stateFileName, os.O_RDWR|os.O_CREATE, 0644)
-	if err != nil {
-		panic(err)
-	}
-	defer func(file *os.File) {
-		err := file.Close()
+	go func() {
+		file, err := os.OpenFile(stateFileName, os.O_RDWR|os.O_CREATE, 0644)
 		if err != nil {
 			panic(err)
 		}
-	}(file)
-	decoder := json.NewDecoder(file)
-	err = decoder.Decode(&state)
-	if err != nil {
-		if errors.Is(err, io.EOF) {
-			state = make(map[int64]string)
+		defer func(file *os.File) {
+			err := file.Close()
+			if err != nil {
+				panic(err)
+			}
+		}(file)
+		decoder := json.NewDecoder(file)
+		err = decoder.Decode(&state)
+		if err != nil {
+			if errors.Is(err, io.EOF) {
+				state = make(map[int64]string)
+			}
 		}
-	}
+	}()
 }

@@ -26,8 +26,15 @@ func init() {
 func main() {
 	botToken, ok := os.LookupEnv("BOT_TOKEN")
 	if !ok {
-		return
+		log.Fatal(".env BOT_TOKEN not found")
 	}
+
+	webHookURL, ok := os.LookupEnv("WEBHOOK_URL")
+
+	if !ok {
+		log.Fatal(".env BOT_TOKEN not found")
+	}
+
 	bot, err := telego.NewBot(botToken, telego.WithDefaultDebugLogger())
 	if err != nil {
 		fmt.Println(err)
@@ -40,7 +47,7 @@ func main() {
 	done := make(chan struct{}, 1)
 
 	updates, _ := bot.UpdatesViaWebhook("/bot"+bot.Token(), telego.WithWebhookSet(&telego.SetWebhookParams{
-		URL: "https://b330-188-0-169-220.ngrok-free.app/bot" + bot.Token(),
+		URL: webHookURL + "/bot" + bot.Token(),
 	}))
 
 	bh, _ := th.NewBotHandler(bot, updates, th.WithStopTimeout(time.Second*5))
